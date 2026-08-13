@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 import dotenv from "dotenv";
@@ -12,14 +11,16 @@ const PORT = 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
-// Normalize req.url for Vercel Serverless environment
+// Normalize req.url and health check for Vercel Serverless environment
 app.use((req, res, next) => {
   if (req.url === "/api" || req.url === "/api/") {
-    req.url = "/api/health";
-  } else if (!req.url.startsWith("/api/")) {
-    req.url = "/api" + (req.url.startsWith("/") ? req.url : "/" + req.url);
+    return res.json({ status: "ok", service: "PropSearch Engine API" });
   }
   next();
+});
+
+app.get(["/api/health", "/health"], (req, res) => {
+  res.json({ status: "ok", service: "PropSearch Engine API" });
 });
 
 // Initialize Gemini API client lazily / safely
@@ -780,7 +781,7 @@ function createFallbackDossier(
 }
 
 // API Route: Generate Property Buyer Profile
-app.post("/api/profile", async (req, res) => {
+app.post(["/api/profile", "/profile"], async (req, res) => {
   try {
     const { name, phoneNumber, residence, socialMediaLink, company, position, location, targetBudget, propertyType, buyerCategory, serperApiKey, openaiApiKey, aiEngine } = req.body;
 
@@ -1042,7 +1043,7 @@ Lakukan analisis & sintesis profil psikologi pembeli di area/kategori ini, krite
 });
 
 // API Route: Generate WhatsApp Script & Follow-up Strategy for Real Estate
-app.post("/api/pitch-generate", async (req, res) => {
+app.post(["/api/pitch-generate", "/pitch-generate"], async (req, res) => {
   try {
     const { dossier, offeringType, customNotes } = req.body;
     if (!dossier || !dossier.buyerProfile) {
@@ -1170,9 +1171,20 @@ Kembalikan format JSON:
   }
 });
 
+// Global Error Handler for Express
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("[PropSearch Server Error]:", err);
+  res.status(500).json({
+    success: false,
+    error: "Terjadi kesalahan pada server PropSearch.",
+    details: err?.message || String(err),
+  });
+});
+
 async function startServer() {
   // Vite middleware for development mode
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

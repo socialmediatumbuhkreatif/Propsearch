@@ -33,6 +33,12 @@ export const PitchStudio: React.FC<PitchStudioProps> = ({ dossier, onBack }) => 
         }),
       });
 
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        alert(`Gagal terhubung ke server API (${response.status}). Silakan coba beberapa saat lagi.`);
+        return;
+      }
+
       const data = await response.json();
       if (data.success) {
         setPitchResult(data.pitch);
