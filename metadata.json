@@ -1,0 +1,6 @@
+{
+  "name": "ProSearch - AI Property Buyer Profiling by PropLab.ai",
+  "description": "ProSearch oleh PropLab AI - Platform intelijen & profiling calon pembeli rumah untuk agen properti profesional.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
