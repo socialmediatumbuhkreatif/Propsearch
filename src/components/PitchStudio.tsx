@@ -160,7 +160,7 @@ export const PitchStudio: React.FC<PitchStudioProps> = ({ dossier, onBack }) => 
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs sm:text-sm">
               <div className="whitespace-pre-line text-slate-800 leading-relaxed font-sans font-medium">
-                {pitchResult.emailBody || pitchResult.whatsAppMessage}
+                {pitchResult.waMessage || pitchResult.whatsAppMessage || pitchResult.emailBody}
               </div>
             </div>
           </div>

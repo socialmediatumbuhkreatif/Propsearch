@@ -51,6 +51,14 @@ export default function App() {
         body: JSON.stringify(req),
       });
 
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error("API non-JSON response:", response.status, text);
+        setErrorMessage(`Gagal terhubung ke server API (${response.status}). Silakan coba beberapa saat lagi.`);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success && data.dossier) {

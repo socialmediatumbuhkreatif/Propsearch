@@ -12,6 +12,16 @@ const PORT = 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
+// Normalize req.url for Vercel Serverless environment
+app.use((req, res, next) => {
+  if (req.url === "/api" || req.url === "/api/") {
+    req.url = "/api/health";
+  } else if (!req.url.startsWith("/api/")) {
+    req.url = "/api" + (req.url.startsWith("/") ? req.url : "/" + req.url);
+  }
+  next();
+});
+
 // Initialize Gemini API client lazily / safely
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI {
@@ -1181,4 +1191,9 @@ async function startServer() {
   });
 }
 
-startServer();
+export default app;
+
+if (!process.env.VERCEL) {
+  startServer();
+}
+
